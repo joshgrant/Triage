@@ -8,12 +8,15 @@
 import SwiftUI
 import SwiftData
 
-struct ContentView: View {
+struct FeatureListView: View {
     
     @Environment(\.modelContext) private var modelContext
     
-    @Query(sort: [SortDescriptor(\Feature.eloRank, order: .forward)])
+    @Query(sort: [SortDescriptor(\Feature.compositeRating, order: .reverse)])
     private var features: [Feature]
+    
+    @Query
+    private var history: [History]
     
     @Query
     private var dimensions: [Dimension]
@@ -23,6 +26,9 @@ struct ContentView: View {
     
     @State
     private var showingCompareSheet: Bool = false
+    
+    @State
+    private var showingHistorySheet: Bool = false
 
     var body: some View {
         NavigationSplitView {
@@ -30,7 +36,7 @@ struct ContentView: View {
                 ForEach(features, id: \.id) { feature in
                     VStack(alignment: .leading) {
                         LabeledContent {
-                            Text("\(feature.eloRank)")
+                            Text("\(feature.compositeRating)")
                         } label: {
                             Text(feature.title)
                         }
@@ -48,6 +54,14 @@ struct ContentView: View {
             .navigationSplitViewColumnWidth(min: 180, ideal: 200)
 #endif
             .toolbar {
+                
+                ToolbarItem(placement: .topBarLeading) {
+                    Button {
+                        showingHistorySheet = true
+                    } label: {
+                        Text("History")
+                    }
+                }
 #if os(iOS)
                 ToolbarItem(placement: .navigationBarTrailing) {
                     EditButton()
@@ -81,13 +95,20 @@ struct ContentView: View {
                 }
             }
             .sheet(isPresented: $showingCompareSheet) {
-                if let (a, b) = pickPair(features: features) {
+                if let (a, b) = pickPair(features: features, history: history) {
                     NavigationStack {
                         CompareView(
                             featureA: a,
-                            featureB: b
+                            featureB: b,
+                            featureCount: features.count,
+                            historyCount: history.count
                         )
                     }
+                }
+            }
+            .sheet(isPresented: $showingHistorySheet) {
+                NavigationStack {
+                    HistoryListView()
                 }
             }
         } detail: {
@@ -99,7 +120,6 @@ struct ContentView: View {
         withAnimation {
             let newItem = Feature(
                 title: title,
-                eloRank: 0,
                 ratings: dimensions.map {
                     .init(value: 1200, dimension: $0)
                 }
@@ -124,12 +144,11 @@ struct ContentView: View {
     for i in 0 ..< 10 {
         let feature = Feature(
             title: "Feature (\(i))",
-            eloRank: 1200,
             ratings: []
         )
         container.mainContext.insert(feature)
     }
     
-    return ContentView()
+    return FeatureListView()
         .modelContainer(container)
 }

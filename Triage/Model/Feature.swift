@@ -13,21 +13,26 @@ final class Feature {
     
     // MARK: - Properties
     
-    var title: String
-    var eloRank: Int
-    var ratings: [Rating]
-    var comparisonCount: Int
+    private(set) var title: String
+    private(set) var ratings: [Rating]
+    private(set) var compositeRating: Int
     
     // MARK: - Initialization
     
     init(
         title: String,
-        eloRank: Int,
         ratings: [Rating]
     ) {
         self.title = title
-        self.eloRank = eloRank
         self.ratings = ratings
-        self.comparisonCount = 0
+        self.compositeRating = 1200
+    }
+    
+    func update() {
+        let total = ratings.reduce(0) { partialResult, rating in
+            partialResult + rating.value
+        }
+        
+        compositeRating = Int(total) / ratings.count
     }
 }

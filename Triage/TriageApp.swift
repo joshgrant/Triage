@@ -14,7 +14,9 @@ struct TriageApp: App {
     var sharedModelContainer: ModelContainer = {
         let schema = Schema([
             Feature.self,
-            Rating.self
+            Rating.self,
+            History.self,
+            Dimension.self
         ])
         
         let modelConfiguration = ModelConfiguration(schema: schema, isStoredInMemoryOnly: false)
@@ -30,7 +32,7 @@ struct TriageApp: App {
 
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            FeatureListView()
         }
         .modelContainer(sharedModelContainer)
     }

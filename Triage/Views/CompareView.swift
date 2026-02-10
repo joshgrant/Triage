@@ -11,7 +11,22 @@ import EloRater
 
 struct CompareView: View {
     
+    enum Result {
+        case aWins
+        case bWins
+        case tie
+        
+        var value: Double {
+            switch self {
+            case .aWins: return 1
+            case .bWins: return 0
+            case .tie: return 0.5
+            }
+        }
+    }
+    
     @Environment(\.modelContext) private var modelContext
+    @Environment(\.dismiss) private var dismiss
     
     @Query(sort: [SortDescriptor(\Dimension.weight, order: .forward)])
     private var dimensions: [Dimension]
@@ -25,16 +40,27 @@ struct CompareView: View {
     @State
     var featureB: Feature
     
+    var featureCount: Int
+    var historyCount: Int
+    
+    var recommended: Int {
+        Int(ceil(Float(featureCount) * log2(Float(max(featureCount, 2)))))
+    }
+    
     var body: some View {
         TabView(selection: $selection) {
             ForEach(dimensions.enumerated(), id: \.element.id) { (offset, dimension) in
                 Tab(value: offset) {
                     VStack(spacing: 20) {
+                        if featureCount < recommended {
+                            Text("You've rated \(historyCount) items. \(recommended) reccomended")
+                        }
+                        
                         Text(dimensionLabel(dimension: dimension, item: offset, total: dimensions.count))
                             .font(.headline)
                             .foregroundStyle(.secondary)
                         Text(dimension.explanation)
-                            .font(.title)
+                            .font(.title3)
                             .frame(maxWidth: .infinity, alignment: .leading)
                             .multilineTextAlignment(.leading)
                         
@@ -43,9 +69,9 @@ struct CompareView: View {
                                 a: featureA,
                                 b: featureB,
                                 dimension: dimension,
-                                result: 1
+                                result: .aWins
                             )
-                            selection += 1
+                            moveToNext(result: .aWins, dimension: dimension)
                         } label: {
                             Text(featureA.title)
                                 .font(.title2)
@@ -60,9 +86,9 @@ struct CompareView: View {
                                 a: featureA,
                                 b: featureB,
                                 dimension: dimension,
-                                result: 0
+                                result: .bWins
                             )
-                            selection += 1
+                            moveToNext(result: .bWins, dimension: dimension)
                         } label: {
                             Text(featureB.title)
                                 .font(.title2)
@@ -77,9 +103,9 @@ struct CompareView: View {
                                 a: featureA,
                                 b: featureB,
                                 dimension: dimension,
-                                result: 0.5
+                                result: .tie
                             )
-                            selection += 1
+                            moveToNext(result: .tie, dimension: dimension)
                         } label: {
                             Text("Skip")
                         }
@@ -108,7 +134,7 @@ struct CompareView: View {
         a: Feature,
         b: Feature,
         dimension: Dimension,
-        result: Double
+        result: Result
     ) {
         guard
             let ratingA = a.ratings.first(where: { $0.dimension == dimension }),
@@ -121,18 +147,39 @@ struct CompareView: View {
         let (newA, newB) = newRatings(
             a: ratingA.value,
             b: ratingB.value,
-            result: result
+            result: result.value
         )
         
         ratingA.value = newA
         ratingB.value = newB
     }
     
-    private func moveToNext() {
-        selection += 1
+    private func moveToNext(result: Result, dimension: Dimension) {
+        featureA.update()
+        featureB.update()
         
-        if selection > dimensions.count {
-            // Recalculate the featureA and featureB
+        let selectedFeature: Feature? = switch result {
+        case .aWins: featureA
+        case .bWins: featureB
+        case .tie: nil
+        }
+        
+        let history = History(
+            timestamp: .now,
+            featureA: featureA,
+            featureB: featureB,
+            dimension: dimension,
+            selectedFeature: selectedFeature
+        )
+        
+        modelContext.insert(history)
+        
+        withAnimation {
+            selection += 1
+        }
+        
+        if selection >= dimensions.count {
+            dismiss()
         }
     }
 }
@@ -157,18 +204,21 @@ struct CompareView: View {
     
     let featureA = Feature(
         title: "Butter on Toast",
-        eloRank: 312,
         ratings: ratings
     )
     
     let featureB = Feature(
         title: "Avocado on Toast",
-        eloRank: 312,
         ratings: ratings
     )
     
     return NavigationStack {
-        CompareView(featureA: featureA, featureB: featureB)
+        CompareView(
+            featureA: featureA,
+            featureB: featureB,
+            featureCount: 2,
+            historyCount: 0,
+        )
     }
     .modelContainer(container)
 }
