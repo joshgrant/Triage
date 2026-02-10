@@ -1,0 +1,15 @@
+{
+  "originHash" : "dc52afcea772b201f2d5741540a536a13cb811de90826e0b127d3c30007a8588",
+  "pins" : [
+    {
+      "identity" : "elorater",
+      "kind" : "remoteSourceControl",
+      "location" : "git@github.com:joshgrant/EloRater.git",
+      "state" : {
+        "branch" : "main",
+        "revision" : "688ef6fac5615338f400d9b5a7a87288e1e524bf"
+      }
+    }
+  ],
+  "version" : 3
+}

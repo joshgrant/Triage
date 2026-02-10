@@ -6,6 +6,10 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		8CE96F062F3BA8FF00B302B9 /* EloRater in Frameworks */ = {isa = PBXBuildFile; productRef = 8CE96F052F3BA8FF00B302B9 /* EloRater */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXFileReference section */
 		8CE96EEF2F3BA77600B302B9 /* Triage.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Triage.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
@@ -36,6 +40,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				8CE96F062F3BA8FF00B302B9 /* EloRater in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -78,6 +83,7 @@
 			);
 			name = Triage;
 			packageProductDependencies = (
+				8CE96F052F3BA8FF00B302B9 /* EloRater */,
 			);
 			productName = Triage;
 			productReference = 8CE96EEF2F3BA77600B302B9 /* Triage.app */;
@@ -107,6 +113,9 @@
 			);
 			mainGroup = 8CE96EE62F3BA77600B302B9;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				8CE96F042F3BA8FF00B302B9 /* XCRemoteSwiftPackageReference "EloRater" */,
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 8CE96EF02F3BA77600B302B9 /* Products */;
 			projectDirPath = "";
@@ -366,6 +375,25 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		8CE96F042F3BA8FF00B302B9 /* XCRemoteSwiftPackageReference "EloRater" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "git@github.com:joshgrant/EloRater.git";
+			requirement = {
+				branch = main;
+				kind = branch;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		8CE96F052F3BA8FF00B302B9 /* EloRater */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 8CE96F042F3BA8FF00B302B9 /* XCRemoteSwiftPackageReference "EloRater" */;
+			productName = EloRater;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 8CE96EE72F3BA77600B302B9 /* Project object */;
 }

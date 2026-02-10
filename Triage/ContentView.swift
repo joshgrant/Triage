@@ -9,17 +9,32 @@ import SwiftUI
 import SwiftData
 
 struct ContentView: View {
+    
     @Environment(\.modelContext) private var modelContext
-    @Query private var items: [Item]
+    
+    @Query(sort: [SortDescriptor(\Feature.eloRank, order: .forward)])
+    private var features: [Feature]
+    
+    @State
+    private var showingAddSheet: Bool = false
 
     var body: some View {
         NavigationSplitView {
             List {
-                ForEach(items) { item in
-                    NavigationLink {
-                        Text("Item at \(item.timestamp, format: Date.FormatStyle(date: .numeric, time: .standard))")
-                    } label: {
-                        Text(item.timestamp, format: Date.FormatStyle(date: .numeric, time: .standard))
+                ForEach(features, id: \.id) { feature in
+                    VStack(alignment: .leading) {
+                        LabeledContent {
+                            Text("\(feature.eloRank)")
+                        } label: {
+                            Text(feature.title)
+                        }
+                        
+                        HStack {
+                            Text("Fuck")
+                            Text("Suck")
+                            Text("Cum")
+                            Text("Jizz")
+                        }
                     }
                 }
                 .onDelete(perform: deleteItems)
@@ -34,8 +49,19 @@ struct ContentView: View {
                 }
 #endif
                 ToolbarItem {
-                    Button(action: addItem) {
+                    Button {
+                        showingAddSheet = true
+                    } label: {
                         Label("Add Item", systemImage: "plus")
+                    }
+                }
+            }
+            .sheet(isPresented: $showingAddSheet) {
+                NavigationStack {
+                    NewFeatureView { title in
+                        if let title {
+                            addItem(title: title)
+                        }
                     }
                 }
             }
@@ -44,9 +70,12 @@ struct ContentView: View {
         }
     }
 
-    private func addItem() {
+    private func addItem(title: String) {
         withAnimation {
-            let newItem = Item(timestamp: Date())
+            let newItem = Feature(
+                title: title,
+                eloRank: 0
+            )
             modelContext.insert(newItem)
         }
     }
@@ -54,13 +83,22 @@ struct ContentView: View {
     private func deleteItems(offsets: IndexSet) {
         withAnimation {
             for index in offsets {
-                modelContext.delete(items[index])
+                modelContext.delete(features[index])
             }
         }
     }
 }
 
 #Preview {
-    ContentView()
-        .modelContainer(for: Item.self, inMemory: true)
+
+    let configuration = ModelConfiguration(isStoredInMemoryOnly: true)
+    let container = try! ModelContainer(for: Feature.self, configurations: configuration)
+    
+    for i in 0 ..< 10 {
+        let feature = Feature(title: "Feature (\(i))", eloRank: 1200)
+        container.mainContext.insert(feature)
+    }
+    
+    return ContentView()
+        .modelContainer(container)
 }
