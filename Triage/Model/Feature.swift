@@ -1,5 +1,5 @@
 //
-//  Item.swift
+//  Feature.swift
 //  Triage
 //
 //  Created by Joshua Grant on 2/10/26.
@@ -29,10 +29,18 @@ final class Feature {
     }
     
     func update() {
-        let total = ratings.reduce(0) { partialResult, rating in
-            partialResult + rating.value
+        guard !ratings.isEmpty else { return }
+
+        let weightedTotal = ratings.reduce(0.0) { partialResult, rating in
+            partialResult + rating.value * Double(rating.dimension.weight)
         }
-        
-        compositeRating = Int(total) / ratings.count
+
+        let totalWeight = ratings.reduce(0) { partialResult, rating in
+            partialResult + rating.dimension.weight
+        }
+
+        guard totalWeight > 0 else { return }
+
+        compositeRating = Int(weightedTotal / Double(totalWeight))
     }
 }

@@ -39,46 +39,22 @@ struct TriageApp: App {
 }
 
 private func populateDatabase(in container: ModelContainer) {
-    let userImpact = Dimension(
-        label: "User Impact",
-        explanation: "Which matters more to users?",
-        weight: 3
-    )
-    
-    let effort = Dimension(
-        label: "Effort",
-        explanation: "Which is easier to implement?",
-        weight: 3
-    )
-    
-    let alignment = Dimension(
-        label: "Alignment",
-        explanation: "Which aligns better with the current goal?",
-        weight: 2
-    )
-    
-    let confidence = Dimension(
-        label: "Confidence",
-        explanation: "Which one has more data to support its need?",
-        weight: 2
-    )
-    
-    let opportunity = Dimension(
-        label: "Urgency",
-        explanation: "Which one loses more value if delayed?",
-        weight: 1
-    )
-    
-    let dependency = Dimension(
-        label: "Dependencies",
-        explanation: "Which one has fewer dependencies?",
-        weight: 1
-    )
-    
-    container.mainContext.insert(userImpact)
-    container.mainContext.insert(effort)
-    container.mainContext.insert(alignment)
-    container.mainContext.insert(confidence)
-    container.mainContext.insert(opportunity)
-    container.mainContext.insert(dependency)
+    let descriptor = FetchDescriptor<Dimension>()
+    let existingCount = (try? container.mainContext.fetchCount(descriptor)) ?? 0
+
+    guard existingCount == 0 else { return }
+
+    let defaults: [(String, String, Int)] = [
+        ("User Impact", "Which matters more to users?", 3),
+        ("Effort", "Which is easier to implement?", 3),
+        ("Alignment", "Which aligns better with the current goal?", 2),
+        ("Confidence", "Which one has more data to support its need?", 2),
+        ("Urgency", "Which one loses more value if delayed?", 1),
+        ("Dependencies", "Which one has fewer dependencies?", 1),
+    ]
+
+    for (label, explanation, weight) in defaults {
+        let dimension = Dimension(label: label, explanation: explanation, weight: weight)
+        container.mainContext.insert(dimension)
+    }
 }

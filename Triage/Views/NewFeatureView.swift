@@ -1,5 +1,5 @@
 //
-//  AddSheet.swift
+//  NewFeatureView.swift
 //  Triage
 //
 //  Created by Joshua Grant on 2/10/26.
@@ -8,42 +8,41 @@
 import SwiftUI
 
 struct NewFeatureView: View {
-    
+
     @Environment(\.dismiss) private var dismiss
-    
+
     @State
     private var title: String = ""
 
     var submit: (String?) -> Void
-    
+
     var body: some View {
         List {
             TextField("Feature", text: $title, prompt: Text("Implement authentication…"))
-                .lineLimit(0)
+                .lineLimit(nil)
         }
         .toolbar {
             ToolbarItem(placement: .cancellationAction) {
-                Button(role: .cancel) {
+                Button("Cancel") {
                     submit(nil)
                     dismiss()
                 }
             }
-            
+
             ToolbarItem(placement: .confirmationAction) {
-                Button(
-                    role: .confirm,
-                    action: {
-                        submit(title)
-                        dismiss()
-                    },
-                    label: {
-                        Label("Add", systemImage: "plus")
-                    }
-                )
+                Button {
+                    submit(title.trimmingCharacters(in: .whitespacesAndNewlines))
+                    dismiss()
+                } label: {
+                    Label("Add", systemImage: "plus")
+                }
+                .disabled(title.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
             }
         }
         .navigationTitle("New Feature")
+        #if os(iOS)
         .navigationBarTitleDisplayMode(.inline)
+        #endif
         .presentationDetents([.medium])
     }
 }

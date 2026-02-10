@@ -31,9 +31,7 @@ struct RatingView: View {
     
     private var ratingLabel: String {
         if displayedValue > 0 {
-            return displayedValue.formatted()
-        } else if displayedValue < 0 {
-            return displayedValue.formatted()
+            return "+\(displayedValue)"
         } else {
             return displayedValue.formatted()
         }

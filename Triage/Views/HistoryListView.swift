@@ -9,33 +9,47 @@ import SwiftUI
 import SwiftData
 
 struct HistoryListView: View {
-    
+
     @Environment(\.modelContext) private var modelContext
-    
+
     @Query(sort: [SortDescriptor(\History.timestamp, order: .reverse)])
     private var historyItems: [History]
-    
+
     var body: some View {
         List {
             ForEach(historyItems, id: \.id) { item in
-                LabeledContent {
-                    Text(item.timestamp.formatted())
-                } label: {
+                VStack(alignment: .leading, spacing: 4) {
                     Text(content(item: item))
+                    HStack {
+                        Text(item.dimension.label)
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                        Spacer()
+                        Text(item.timestamp.formatted())
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    }
                 }
             }
         }
         .navigationTitle("History")
+        #if os(iOS)
         .navigationBarTitleDisplayMode(.inline)
+        #endif
     }
-    
+
     private func content(item: History) -> String {
-        if item.selectedFeature == item.featureA {
-            "\(item.featureA.title) > \(item.featureB.title)"
+        let titleA = item.featureA?.title ?? "Deleted"
+        let titleB = item.featureB?.title ?? "Deleted"
+
+        if item.skipped {
+            return "\(titleA) ~ \(titleB) (skipped)"
+        } else if item.selectedFeature == item.featureA {
+            return "\(titleA) > \(titleB)"
         } else if item.selectedFeature == item.featureB {
-            "\(item.featureB.title) > \(item.featureA.title)"
+            return "\(titleB) > \(titleA)"
         } else {
-            "\(item.featureB.title) == \(item.featureA.title)"
+            return "\(titleA) == \(titleB)"
         }
     }
 }
@@ -43,16 +57,16 @@ struct HistoryListView: View {
 #Preview {
     let configuration = ModelConfiguration(isStoredInMemoryOnly: true)
     let container = try! ModelContainer(for: History.self, configurations: configuration)
-    
+
     let dimension = Dimension(
         label: "Dimension",
         explanation: "Which one is more dimensional?",
         weight: 1
     )
-    
+
     let featureA = Feature(title: "Onboarding", ratings: [])
     let featureB = Feature(title: "Preferences", ratings: [])
-    
+
     let feature = History(
         timestamp: Date(),
         featureA: featureA,
@@ -60,7 +74,7 @@ struct HistoryListView: View {
         dimension: dimension,
         selectedFeature: featureA)
     container.mainContext.insert(feature)
-    
+
     let feature2 = History(
         timestamp: Date(),
         featureA: featureA,
@@ -68,7 +82,7 @@ struct HistoryListView: View {
         dimension: dimension,
         selectedFeature: featureB)
     container.mainContext.insert(feature2)
-    
+
     let feature3 = History(
         timestamp: Date(),
         featureA: featureA,
@@ -76,7 +90,7 @@ struct HistoryListView: View {
         dimension: dimension,
         selectedFeature: nil)
     container.mainContext.insert(feature3)
-    
+
     return NavigationStack {
         HistoryListView()
             .modelContainer(container)
