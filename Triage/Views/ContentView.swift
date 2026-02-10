@@ -15,8 +15,14 @@ struct ContentView: View {
     @Query(sort: [SortDescriptor(\Feature.eloRank, order: .forward)])
     private var features: [Feature]
     
+    @Query
+    private var dimensions: [Dimension]
+    
     @State
     private var showingAddSheet: Bool = false
+    
+    @State
+    private var showingCompareSheet: Bool = false
 
     var body: some View {
         NavigationSplitView {
@@ -29,11 +35,10 @@ struct ContentView: View {
                             Text(feature.title)
                         }
                         
-                        HStack {
-                            Text("Fuck")
-                            Text("Suck")
-                            Text("Cum")
-                            Text("Jizz")
+                        HStack(spacing: 2) {
+                            ForEach(feature.ratings, id: \.id) { rating in
+                                RatingView(rating: rating)
+                            }
                         }
                     }
                 }
@@ -55,6 +60,16 @@ struct ContentView: View {
                         Label("Add Item", systemImage: "plus")
                     }
                 }
+                
+                if features.count >= 2 {
+                    ToolbarItem(placement: .bottomBar) {
+                        Button {
+                            showingCompareSheet = true
+                        } label: {
+                            Text("Compare")
+                        }
+                    }
+                }
             }
             .sheet(isPresented: $showingAddSheet) {
                 NavigationStack {
@@ -62,6 +77,16 @@ struct ContentView: View {
                         if let title {
                             addItem(title: title)
                         }
+                    }
+                }
+            }
+            .sheet(isPresented: $showingCompareSheet) {
+                if let (a, b) = pickPair(features: features) {
+                    NavigationStack {
+                        CompareView(
+                            featureA: a,
+                            featureB: b
+                        )
                     }
                 }
             }
@@ -74,7 +99,10 @@ struct ContentView: View {
         withAnimation {
             let newItem = Feature(
                 title: title,
-                eloRank: 0
+                eloRank: 0,
+                ratings: dimensions.map {
+                    .init(value: 1200, dimension: $0)
+                }
             )
             modelContext.insert(newItem)
         }
@@ -90,12 +118,15 @@ struct ContentView: View {
 }
 
 #Preview {
-
     let configuration = ModelConfiguration(isStoredInMemoryOnly: true)
     let container = try! ModelContainer(for: Feature.self, configurations: configuration)
     
     for i in 0 ..< 10 {
-        let feature = Feature(title: "Feature (\(i))", eloRank: 1200)
+        let feature = Feature(
+            title: "Feature (\(i))",
+            eloRank: 1200,
+            ratings: []
+        )
         container.mainContext.insert(feature)
     }
     

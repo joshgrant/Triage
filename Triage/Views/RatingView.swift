@@ -25,19 +25,27 @@ struct RatingView: View {
         rating.dimension.label.prefix(3).uppercased()
     }
     
+    private var displayedValue: Int {
+        Int(rating.value - 1200)
+    }
+    
     private var ratingLabel: String {
-        if rating.value > 0 {
-            "+\(rating.value)"
+        if displayedValue > 0 {
+            return displayedValue.formatted()
+        } else if displayedValue < 0 {
+            return displayedValue.formatted()
         } else {
-            "\(rating.value)"
+            return displayedValue.formatted()
         }
     }
     
     private var ratingColor: Color {
-        if rating.value > 0 {
+        if displayedValue > 0 {
             return .green
-        } else {
+        } else if displayedValue < 0 {
             return .red
+        } else {
+            return .gray
         }
     }
 }
@@ -49,7 +57,7 @@ struct RatingView: View {
         weight: 3)
     
     let rating = Rating(
-        value: 31,
+        value: 1194,
         dimension: dimension
     )
     

@@ -8,19 +8,19 @@
 import Foundation
 import SwiftData
 
-/// A rating is a derived value taken from the
+/// A rating is an Elo rank for a feature along a given dimension
 @Model
 final class Rating {
     
     // MARK: - Properties
     
-    var value: Int
+    var value: Double
     var dimension: Dimension
     
     // MARK: - Initialization
     
     init(
-        value: Int,
+        value: Double,
         dimension: Dimension
     ) {
         self.value = value

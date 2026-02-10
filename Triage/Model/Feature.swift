@@ -15,14 +15,19 @@ final class Feature {
     
     var title: String
     var eloRank: Int
+    var ratings: [Rating]
+    var comparisonCount: Int
     
     // MARK: - Initialization
     
     init(
         title: String,
-        eloRank: Int
+        eloRank: Int,
+        ratings: [Rating]
     ) {
         self.title = title
         self.eloRank = eloRank
+        self.ratings = ratings
+        self.comparisonCount = 0
     }
 }
